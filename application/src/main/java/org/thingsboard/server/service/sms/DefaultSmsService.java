@@ -58,11 +58,13 @@ public class DefaultSmsService implements SmsService {
     private SmsSender smsSender;
     ScheduledExecutorService timeoutScheduler;
 
+    // Initialize the SMS configuration after the service is created
     @PostConstruct
     private void init() {
         updateSmsConfiguration();
     }
 
+    // Cleanup resources when the service is destroyed
     @PreDestroy
     private void destroy() {
         if (this.smsSender != null) {
@@ -73,6 +75,7 @@ public class DefaultSmsService implements SmsService {
         }
     }
 
+    // Updates the SMS configuration by retrieving settings and creating a new SMS sender
     @Override
     public void updateSmsConfiguration() {
         AdminSettings settings = adminSettingsService.findAdminSettingsByKey(TenantId.SYS_TENANT_ID, "sms");
@@ -98,6 +101,7 @@ public class DefaultSmsService implements SmsService {
         return this.sendSms(this.smsSender, numberTo, message);
     }
 
+    //Sends SMS messages asynchronously to multiple recipients  
     @Override
     public ListenableFuture<Void> sendSms(SmsSender smsSender, String[] numbersToList, String message) {
         ListenableFuture<Void> future = smsExecutor.executeAsync(() -> {
@@ -118,6 +122,7 @@ public class DefaultSmsService implements SmsService {
         return Futures.withTimeout(future, TIMEOUT, TimeUnit.SECONDS, timeoutScheduler);
     }
 
+    // Handles the sending of SMS in a transaction
     public void doSendSms(TenantId tenantId, CustomerId customerId, String[] numbersTo, String message) {
     	if (apiUsageStateService.getApiUsageState(tenantId).isSmsSendEnabled()) {
             int smsCount = 0;
@@ -155,6 +160,7 @@ public class DefaultSmsService implements SmsService {
         return smsSender != null;
     }
 
+    // Sends an SMS message to a single recipient
     private int sendSms(SmsSender smsSender, String numberTo, String message) throws ThingsboardException {
         try {
             int sentSms = smsSender.sendSms(numberTo, message);
