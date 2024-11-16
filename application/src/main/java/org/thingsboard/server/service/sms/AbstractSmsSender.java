@@ -28,7 +28,7 @@ public abstract class AbstractSmsSender implements SmsSender {
 
     private static final int MAX_SMS_MESSAGE_LENGTH = 1600;
     private static final int MAX_SMS_SEGMENT_LENGTH = 70;
-
+    
     protected String validatePhoneNumber(String phoneNumber) throws SmsParseException {
         phoneNumber = phoneNumber.trim();
         if (!E_164_PHONE_NUMBER_PATTERN.matcher(phoneNumber).matches()) {
@@ -50,4 +50,8 @@ public abstract class AbstractSmsSender implements SmsSender {
         return (int)Math.ceil((double) message.length() / (double) MAX_SMS_SEGMENT_LENGTH);
     }
 
+    @Override
+    public void close() throws Exception {
+        destroy();
+    }
 }
