@@ -41,9 +41,7 @@ import {
   DashboardCallbacks,
   DashboardWidget,
   DashboardWidgets,
-  IDashboardComponent,
-  maxGridsterCol,
-  maxGridsterRow
+  IDashboardComponent
 } from '../../models/dashboard-component.models';
 import { ReplaySubject, Subject, Subscription } from 'rxjs';
 import { WidgetLayout, WidgetLayouts } from '@shared/models/dashboard.models';
@@ -233,10 +231,10 @@ export class DashboardComponent extends PageComponent implements IDashboardCompo
       disableAutoPositionOnConflict: false,
       pushItems: false,
       swap: false,
-      maxRows: maxGridsterRow,
+      maxRows: 3000,
       minCols: this.columns ? this.columns : 24,
       setGridSize: this.setGridSize,
-      maxCols: maxGridsterCol,
+      maxCols: 3000,
       maxItemCols: 1000,
       maxItemRows: 1000,
       maxItemArea: 1000000,
