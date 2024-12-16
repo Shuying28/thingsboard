@@ -27,12 +27,22 @@
   <link rel="preload" href="assets/fonts/MaterialIcons-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
   <link rel="preload" href="assets/fonts/MaterialIconsRound-Regular.otf" as="font" type="font/otf" crossorigin="anonymous" />
   <link rel="stylesheet" href="assets/fonts/material-icons.css" />
+  <script>
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.body.className = prefersDark ? 'tb-dark' : 'tb-default';
+  </script>
   <style type="text/css">
 
     body, html {
       height: 100%;
       overflow: hidden;
-      background-color: #eee;
+      background-color: #eee; /* Default to light theme */
+
+      @media (prefers-color-scheme: dark) {
+        body, html {
+          background-color: #121212; /* Dark theme background */
+        }
+      }
     }
 
     .tb-loading-spinner {
@@ -52,13 +62,19 @@
       width: 30px;
       height: 30px;
       margin-right: 10px;
-      background-color: rgb(43,160,199);
-
       border-radius: 100%;
       display: inline-block;
       -webkit-animation: tb-bouncedelay 1.4s infinite ease-in-out both;
       -moz-animation: tb-bouncedelay 1.4s infinite ease-in-out both;
       animation: tb-bouncedelay 1.4s infinite ease-in-out both;
+
+      @media (prefers-color-scheme: light) {
+        background-color: rgb(43, 160, 199); /* Light mode */
+      }
+
+      @media (prefers-color-scheme: dark) {
+        background-color: rgb(100, 181, 246); /* Dark mode */
+      }
     }
 
     .tb-loading-spinner .tb-bounce1 {

@@ -117,15 +117,15 @@ $tb-dark-primary: mat.m2-define-palette($tb-dark-mat-indigo);
 
 $tb-dark-theme-background: (
   status-bar: black,
-  app-bar:    map_get($tb-dark-mat-indigo, 900),
-  background: map_get($tb-dark-mat-indigo, 800),
+  app-bar:    map_get($tb-dark-mat-indigo, 500),
+  background:  #1d263c, // map_get($tb-dark-mat-indigo, 800),
   hover:      rgba(white, 0.04),
   card:       map_get($tb-dark-mat-indigo, 800),
   dialog:     map_get($tb-dark-mat-indigo, 800),
   disabled-button: rgba(white, 0.12),
   raised-button: map-get($tb-dark-mat-indigo, 50),
   focused-button: rgba(white, 0.12),
-  selected-button: map_get($tb-dark-mat-indigo, 900),
+  selected-button: map_get($tb-dark-mat-indigo, 500),
   selected-disabled-button: map_get($tb-dark-mat-indigo, 800),
   disabled-button-toggle: black,
   unselected-chip: map_get($tb-dark-mat-indigo, 700),
@@ -133,10 +133,30 @@ $tb-dark-theme-background: (
   tooltip: map_get(mat.$m2-grey-palette, 700),
 );
 
+$tb-dark-theme-foreground: (
+  base:              white,
+  divider:           $light-dividers,
+  dividers:          $light-dividers,
+  disabled:          $light-disabled-text,
+  disabled-button:   rgba(white, 0.3),
+  disabled-text:     $light-disabled-text,
+  elevation:         black,
+  hint-text:         $light-disabled-text,
+  secondary-text:    $light-secondary-text,
+  icon:              white,
+  icons:             white,
+  text:              white,
+  slider-min:        white,
+  slider-off:        rgba(white, 0.3),
+  slider-off-active: rgba(white, 0.3),
+);
+
 $tb-dark-theme: mat.m2-define-dark-theme((
   color: (
     primary: $tb-dark-primary,
-    accent: $tb-accent
+    accent: $tb-accent,
+    foreground: $tb-dark-theme-foreground,
+    background: $tb-dark-theme-background
   ),
   typography: mat.m2-define-typography-config(),
   density: 0
@@ -261,8 +281,11 @@ $tb-dark-theme: map_merge($tb-dark-theme, $color);
   @include tb-components-theme($tb-theme);
   @include overwrites.theme-overwrites($tb-primary, $tb-theme);
   @include mat.typography-hierarchy($tb-theme);
+  background-color: map-get($tb-theme-background, background);
 }
 
 .tb-dark {
-  @include mat.all-component-colors($tb-dark-theme);
+  @include mat.all-component-themes($tb-dark-theme);
+  @include tb-components-theme($tb-dark-theme);
+  background-color: map-get($tb-dark-theme-background, background);
 }
