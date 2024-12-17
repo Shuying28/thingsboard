@@ -145,6 +145,9 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
   @Input()
   dashboardWidget: DashboardWidget;
 
+  @Input()
+  widget: Widget;
+
   @ViewChild('widgetContent', {read: ViewContainerRef, static: true}) widgetContentContainer: ViewContainerRef;
 
   widget: Widget;
@@ -216,8 +219,6 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
   ngOnInit(): void {
 
     this.loadingData = true;
-
-    this.widget = this.dashboardWidget.widget;
 
     const actionDescriptorsBySourceId: {[actionSourceId: string]: Array<WidgetActionDescriptor>} = {};
     if (this.widget.config.actions) {
