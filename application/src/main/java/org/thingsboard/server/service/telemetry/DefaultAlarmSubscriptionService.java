@@ -181,6 +181,11 @@ public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService
         return alarmService.findAlarmTypesByTenantId(tenantId, pageLink);
     }
 
+    @Override
+    public ListenableFuture<?> createAlarm(TenantId tenantId, EntityId originator, AlarmSeverity severity, String customAlarmTriggered, long l) {
+        return null;
+    }
+
     private void onAlarmUpdated(AlarmApiCallResult result) {
         wsCallBackExecutor.submit(() -> {
             AlarmInfo alarm = result.getAlarm();
