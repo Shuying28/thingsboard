@@ -88,6 +88,7 @@ import org.thingsboard.server.service.system.SystemInfoService;
 import org.thingsboard.server.service.update.UpdateService;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -258,7 +259,7 @@ public class AdminController extends BaseController {
         SecurityUser user = getCurrentUser();
         accessControlService.checkPermission(user, Resource.ADMIN_SETTINGS, Operation.READ);
         try {
-            smsService.sendTestSms(testSmsRequest);
+            smsService.sendTestSms(testSmsRequest).get(30, TimeUnit.SECONDS);
             auditLogService.logEntityAction(user.getTenantId(), user.getCustomerId(), user.getId(), user.getName(), user.getId(), user, ActionType.SMS_SENT, null, testSmsRequest.getNumberTo());
         } catch (ThingsboardException e) {
             auditLogService.logEntityAction(user.getTenantId(), user.getCustomerId(), user.getId(), user.getName(), user.getId(), user, ActionType.SMS_SENT, e, testSmsRequest.getNumberTo());

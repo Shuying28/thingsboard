@@ -19,15 +19,19 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.sms.config.TestSmsRequest;
+import org.thingsboard.rule.engine.api.sms.SmsSender;
+import com.google.common.util.concurrent.ListenableFuture;
+
 
 public interface SmsService {
 
     void updateSmsConfiguration();
 
-    void sendSms(TenantId tenantId, CustomerId customerId, String[] numbersTo, String message) throws ThingsboardException;;
-
-    void sendTestSms(TestSmsRequest testSmsRequest) throws ThingsboardException;
+    ListenableFuture<Void> sendSms(TenantId tenantId, CustomerId customerId, String[] numbersTo, String message);
+    
+    ListenableFuture<Void> sendTestSms(TestSmsRequest testSmsRequest);
 
     boolean isConfigured(TenantId tenantId);
-
+    
+    ListenableFuture<Void> sendSms(SmsSender smsSender, String[] numbersToList, String message);
 }
