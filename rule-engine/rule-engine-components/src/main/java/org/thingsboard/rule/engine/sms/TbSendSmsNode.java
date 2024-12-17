@@ -25,6 +25,7 @@ import org.thingsboard.rule.engine.api.util.TbNodeUtils;
 import org.thingsboard.rule.engine.external.TbAbstractExternalNode;
 import org.thingsboard.server.common.data.plugin.ComponentType;
 import org.thingsboard.server.common.msg.TbMsg;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import static org.thingsboard.common.util.DonAsynchron.withCallback;
 
@@ -72,16 +73,14 @@ public class TbSendSmsNode extends TbAbstractExternalNode {
         }
     }
 
-    private void sendSms(TbContext ctx, TbMsg msg) throws Exception {
+    private ListenableFuture<Void> sendSms(TbContext ctx, TbMsg msg) throws Exception {
         String numbersTo = TbNodeUtils.processPattern(this.config.getNumbersToTemplate(), msg);
         String message = TbNodeUtils.processPattern(this.config.getSmsMessageTemplate(), msg);
         String[] numbersToList = numbersTo.split(",");
         if (this.config.isUseSystemSmsSettings()) {
-            ctx.getSmsService().sendSms(ctx.getTenantId(), msg.getCustomerId(), numbersToList, message);
+            return ctx.getSmsService().sendSms(ctx.getTenantId(), msg.getCustomerId(), numbersToList, message);
         } else {
-            for (String numberTo : numbersToList) {
-                this.smsSender.sendSms(numberTo, message);
-            }
+        	return ctx.getSmsService().sendSms(this.smsSender, numbersToList, message);
         }
     }
 

@@ -61,12 +61,17 @@ public class TbMailSender extends JavaMailSenderImpl {
         this.ctx = ctx;
         this.oauth2Enabled = jsonConfig.has("enableOauth2") && jsonConfig.get("enableOauth2").asBoolean();
 
+        // Set SMTP configuration parameters
         setHost(jsonConfig.get("smtpHost").asText());
         setPort(parsePort(jsonConfig.get("smtpPort").asText()));
         setUsername(jsonConfig.get("username").asText());
         if (jsonConfig.has("password")) {
             setPassword(jsonConfig.get("password").asText());
         }
+        if (jsonConfig.has("mailFrom")) {
+            setUsername(jsonConfig.get("mailFrom").asText());
+        }
+        // Create and set JavaMail properties
         setJavaMailProperties(createJavaMailProperties(jsonConfig));
     }
 
@@ -98,6 +103,7 @@ public class TbMailSender extends JavaMailSenderImpl {
         super.testConnection();
     }
 
+    // Refresh OAuth2 access token if it has expired
     public void updateOauth2PasswordIfExpired()  {
         if (getOauth2Enabled() && (System.currentTimeMillis() > getTokenExpires())){
             refreshAccessToken();
@@ -150,6 +156,7 @@ public class TbMailSender extends JavaMailSenderImpl {
         return javaMailProperties;
     }
 
+    // Refresh access token using the refresh token mechanism
     public void refreshAccessToken() {
         lock.lock();
         try {
@@ -163,10 +170,13 @@ public class TbMailSender extends JavaMailSenderImpl {
                 String tokenUri = jsonValue.get("tokenUri").asText();
                 String providerId = jsonValue.get("providerId").asText();
 
+                // Request a new token using the refresh token
                 TokenResponse tokenResponse = new RefreshTokenRequest(new NetHttpTransport(), new GsonFactory(),
                         new GenericUrl(tokenUri), refreshToken)
                         .setClientAuthentication(new ClientParametersAuthentication(clientId, clientSecret))
                         .execute();
+                
+                // Save updated refresh token for the Office 365 provider
                 if (MailOauth2Provider.OFFICE_365.name().equals(providerId)) {
                     ((ObjectNode)jsonValue).put("refreshToken", tokenResponse.getRefreshToken());
                     ((ObjectNode)jsonValue).put("refreshTokenExpires", Instant.now().plus(Duration.ofDays(AZURE_DEFAULT_REFRESH_TOKEN_LIFETIME_IN_DAYS)).toEpochMilli());
