@@ -796,7 +796,7 @@ spring:
     # Database user name
     username: "${SPRING_DATASOURCE_USERNAME:postgres}"
     # Database user password
-    password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
+    password: "${SPRING_DATASOURCE_PASSWORD:1234}"
     hikari:
       # This property controls the amount of time that a connection can be out of the pool before a message is logged indicating a possible connection leak. A value of 0 means leak detection is disabled
       leakDetectionThreshold: "${SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD:0}"
@@ -816,7 +816,7 @@ spring:
       # Database username for events datasource
       username: "${SPRING_EVENTS_DATASOURCE_USERNAME:postgres}"
       # Database user password for events datasource
-      password: "${SPRING_EVENTS_DATASOURCE_PASSWORD:postgres}"
+      password: "${SPRING_EVENTS_DATASOURCE_PASSWORD:1234}"
       hikari:
         # This property controls the amount of time that a connection can be out of the pool before a message is logged indicating a possible connection leak for events datasource. A value of 0 means leak detection is disabled
         leakDetectionThreshold: "${SPRING_EVENTS_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD:0}"
