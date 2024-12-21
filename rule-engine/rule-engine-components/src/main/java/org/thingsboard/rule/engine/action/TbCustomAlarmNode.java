@@ -21,13 +21,26 @@ import org.thingsboard.server.common.data.alarm.Alarm;
 import org.thingsboard.server.common.data.alarm.AlarmSeverity;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.rule.engine.api.RuleNode;
 import org.thingsboard.rule.engine.api.TbContext;
 import org.thingsboard.rule.engine.api.TbNodeConfiguration;
+import org.thingsboard.server.common.data.plugin.ComponentType;
 import org.thingsboard.common.util.JacksonUtil;
 
 /**
  * Custom node for processing alarms based on device-specific thresholds.
  */
+@RuleNode(
+        type = ComponentType.ACTION,
+        name = "Custom Alarm",
+        relationTypes = {"Success", "Failure"},
+        configClazz = TbCustomAlarmNodeConfiguration.class,
+        nodeDescription = "Triggers alarms based on custom device-specific thresholds.",
+        nodeDetails = "Processes messages from devices and triggers alarms when thresholds are exceeded. Configurable thresholds and severities.",
+        uiResources = {"static/rulenode/rulenode-core-config.js"},
+        configDirective = "tbActionNodeCustomAlarmConfig",
+        icon = "notifications_active"
+)
 public class TbCustomAlarmNode extends TbAbstractAlarmNode<TbCustomAlarmNodeConfiguration> {
 
     @Override
@@ -54,7 +67,6 @@ public class TbCustomAlarmNode extends TbAbstractAlarmNode<TbCustomAlarmNodeConf
         // Return a default TbAlarmResult (no alarm created)
         return Futures.immediateFuture(new TbAlarmResult(false, false, false, null));
     }
-
 
     private AlarmSeverity determineSeverity(String deviceType, TbMsgMetaData metaData) {
         if ("temperatureSensor".equals(deviceType)) {

@@ -186,6 +186,19 @@ public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService
         return null;
     }
 
+    @Override
+    public ListenableFuture<AlarmApiCallResult> processCustomAlarm(TenantId tenantId, EntityId originator, AlarmSeverity severity, String alarmType, JsonNode details) {
+        AlarmCreateOrUpdateActiveRequest request = AlarmCreateOrUpdateActiveRequest.builder()
+                .tenantId(tenantId)
+                .originator(originator)
+                .type(alarmType)
+                .severity(severity)
+                .details(details)
+                .build();
+        return Futures.immediateFuture(alarmService.createAlarm(request, true));
+    }
+
+
     private void onAlarmUpdated(AlarmApiCallResult result) {
         wsCallBackExecutor.submit(() -> {
             AlarmInfo alarm = result.getAlarm();
