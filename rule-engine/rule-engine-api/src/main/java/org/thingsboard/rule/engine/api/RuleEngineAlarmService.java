@@ -99,4 +99,8 @@ public interface RuleEngineAlarmService {
     PageData<AlarmData> findAlarmDataByQueryForEntities(TenantId tenantId, AlarmDataQuery query, Collection<EntityId> orderedEntityIds);
 
     PageData<EntitySubtype> findAlarmTypesByTenantId(TenantId tenantId, PageLink pageLink);
+
+    ListenableFuture<?> createAlarm(TenantId tenantId, EntityId originator, AlarmSeverity severity, String customAlarmTriggered, long l);
+
+    ListenableFuture<AlarmApiCallResult> processCustomAlarm(TenantId tenantId, EntityId originator, AlarmSeverity severity, String alarmType, JsonNode details);
 }

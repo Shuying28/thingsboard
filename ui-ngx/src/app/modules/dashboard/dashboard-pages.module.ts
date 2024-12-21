@@ -20,6 +20,7 @@ import { SharedModule } from '@shared/shared.module';
 import { HomeComponentsModule } from '@modules/home/components/home-components.module';
 import { HomeDialogsModule } from '@app/modules/home/dialogs/home-dialogs.module';
 import { DashboardPagesRoutingModule } from './dashboard-pages.routing.module';
+import { CustomAlarmWidgetComponent } from './components/custom-alarm-widget/custom-alarm-widget.component';
 
 @NgModule({
   imports: [
@@ -28,6 +29,12 @@ import { DashboardPagesRoutingModule } from './dashboard-pages.routing.module';
     HomeComponentsModule,
     HomeDialogsModule,
     DashboardPagesRoutingModule
+  ],
+  declarations: [
+    CustomAlarmWidgetComponent
+  ],
+  exports: [
+    CustomAlarmWidgetComponent
   ]
 })
 export class DashboardPagesModule { }

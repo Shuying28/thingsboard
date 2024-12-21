@@ -24,6 +24,7 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 import { MakeDashboardPublicDialogComponent } from '@modules/home/pages/dashboard/make-dashboard-public-dialog.component';
 import { HomeComponentsModule } from '@modules/home/components/home-components.module';
 import { DashboardTabsComponent } from '@home/pages/dashboard/dashboard-tabs.component';
+import {DashboardPagesModule} from "@modules/dashboard/dashboard-pages.module";
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { DashboardTabsComponent } from '@home/pages/dashboard/dashboard-tabs.com
     SharedModule,
     HomeComponentsModule,
     HomeDialogsModule,
-    DashboardRoutingModule
+    DashboardRoutingModule,
+    DashboardPagesModule
   ]
 })
 export class DashboardModule { }
