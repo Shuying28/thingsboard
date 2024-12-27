@@ -127,7 +127,10 @@ public class DefaultTransportRateLimitService implements TransportRateLimitServi
     private void update(TenantId tenantId, EntityTransportRateLimits tenantRateLimitPrototype, EntityTransportRateLimits deviceRateLimitPrototype,
                         EntityTransportRateLimits gatewayRateLimitPrototype, EntityTransportRateLimits gatewayDeviceRateLimitPrototype) {
         mergeLimits(tenantId, tenantRateLimitPrototype, perTenantLimits::get, perTenantLimits::put);
-        getTenantDevices(tenantId).forEach(deviceId -> mergeLimits(deviceId, deviceRateLimitPrototype, perDeviceLimits::get, perDeviceLimits::put));
+        getTenantDevices(tenantId).forEach(deviceId -> {
+                mergeLimits(deviceId, deviceRateLimitPrototype, perDeviceLimits::get, perDeviceLimits::put);
+                notifyDevice(tenantId, deviceId);
+        });
         getTenantGateways(tenantId).forEach(gatewayId -> mergeLimits(gatewayId, gatewayRateLimitPrototype, perGatewayLimits::get, perGatewayLimits::put));
         getTenantGatewayDevices(tenantId).forEach(gatewayId -> mergeLimits(gatewayId, gatewayDeviceRateLimitPrototype, perGatewayDeviceLimits::get, perGatewayDeviceLimits::put));
     }
@@ -148,6 +151,10 @@ public class DefaultTransportRateLimitService implements TransportRateLimitServi
         tenantDevices.values().forEach(set -> set.remove(deviceId));
         tenantGateways.values().forEach(set -> set.remove(deviceId));
         tenantGatewayDevices.values().forEach(set -> set.remove(deviceId));
+    }
+
+    private void notifyDevice(TenantId tenantId, DeviceId deviceId) {
+        throw new RuntimeException("Not implemented");
     }
 
     @Override
@@ -307,7 +314,8 @@ public class DefaultTransportRateLimitService implements TransportRateLimitServi
         return perTenantLimits.computeIfAbsent(tenantId, k -> createRateLimits(tenantProfileCache.get(tenantId), TENANT_LIMITS));
     }
 
-    private EntityTransportRateLimits getDeviceRateLimits(TenantId tenantId, DeviceId deviceId) {
+    @Override
+    public EntityTransportRateLimits getDeviceRateLimits(TenantId tenantId, DeviceId deviceId) {
         return perDeviceLimits.computeIfAbsent(deviceId, k -> {
             EntityTransportRateLimits limits = createRateLimits(tenantProfileCache.get(tenantId), DEVICE_LIMITS);
             getTenantDevices(tenantId).add(deviceId);

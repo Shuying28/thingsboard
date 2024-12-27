@@ -575,6 +575,15 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                 TransportProtos.GetAttributeRequestMsg getAttributeMsg = payloadAdaptor.convertToGetAttributes(deviceSessionCtx, mqttMsg, MqttTopics.DEVICE_ATTRIBUTES_REQUEST_SHORT_TOPIC_PREFIX);
                 transportService.process(deviceSessionCtx.getSessionInfo(), getAttributeMsg, getPubAckCallback(ctx, msgId, getAttributeMsg));
                 attrReqTopicType = TopicType.V2;
+            } else if (topicName.equals(MqttTopics.DEVICE_SERVICE_SETTINGS_REQUEST_TOPIC)) {
+                TransportProtos.SessionInfoProto sessionInfo = deviceSessionCtx.getSessionInfo();
+                TransportProtos.DeviceCoreSettingsRequestToDeviceActorMsg GetDeviceSettingsRequest = TransportProtos.DeviceCoreSettingsRequestToDeviceActorMsg.newBuilder()
+                        .setTenantIdMSB(sessionInfo.getTenantIdMSB())
+                        .setTenantIdLSB(sessionInfo.getTenantIdLSB())
+                        .setDeviceIdMSB(sessionInfo.getDeviceIdMSB())
+                        .setDeviceIdLSB(sessionInfo.getDeviceIdLSB())
+                        .build();
+                transportService.process(deviceSessionCtx.getSessionInfo(), GetDeviceSettingsRequest, getPubAckCallback(ctx, msgId, GetDeviceSettingsRequest));
             } else {
                 transportService.recordActivity(deviceSessionCtx.getSessionInfo());
                 ack(ctx, msgId, MqttReasonCodes.PubAck.TOPIC_NAME_INVALID);
@@ -844,6 +853,8 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                         case MqttTopics.DEVICE_FIRMWARE_ERROR_TOPIC:
                         case MqttTopics.DEVICE_SOFTWARE_RESPONSES_TOPIC:
                         case MqttTopics.DEVICE_SOFTWARE_ERROR_TOPIC:
+                        case MqttTopics.DEVICE_SERVICE_SETTINGS_TOPIC:
+                        case MqttTopics.DEVICE_SERVICE_SETTINGS_RESPONSE_TOPIC:
                             registerSubQoS(topic, grantedQoSList, reqQoS);
                             break;
                         default:
@@ -1321,6 +1332,19 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
             }
         } catch (Exception e) {
             log.trace("[{}] Failed to convert device attributes update to MQTT msg", sessionId, e);
+        }
+    }
+
+    @Override
+    public void onDeviceTransportSettings(TransportProtos.DeviceTransportSettingsMsg response) {
+        log.trace("[{}] Received device transport settings response", sessionId);
+        TransportProtos.DeviceTransportSettingsMsg.Builder responseBuilder = response.toBuilder();
+        responseBuilder.setMaxPayloadSize(context.getMaxPayloadSize());
+        try {
+            Optional<MqttMessage> responseMessage = deviceSessionCtx.getPayloadAdaptor().convertToPublish(deviceSessionCtx, responseBuilder.build());
+            responseMessage.ifPresent(deviceSessionCtx.getChannel()::writeAndFlush);
+        } catch (Exception e) {
+            log.trace("[{}] Failed to convert device transport settings response to MQTT msg", sessionId, e);
         }
     }
 

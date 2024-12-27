@@ -52,6 +52,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.TsKvProto;
 import org.thingsboard.server.gen.transport.TransportProtos.ValidateBasicMqttCredRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ValidateDeviceTokenRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ValidateDeviceX509CertRequestMsg;
+import org.thingsboard.server.gen.transport.TransportProtos.DeviceTransportSettingsMsg;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -515,6 +516,17 @@ public class JsonConverter {
         JsonObject result = new JsonObject();
         result.addProperty(DEVICE_PROPERTY, deviceName);
         result.addProperty("reason", reasonCode);
+        return result;
+    }
+
+    public static JsonObject toJson(DeviceTransportSettingsMsg payload) {
+        JsonObject result = new JsonObject();
+        result.addProperty("payloadType", payload.getPayloadType().name());
+        result.addProperty("regularMsgRateLimit", payload.getRegularMsgRateLimits());
+        result.addProperty("telemetryMsgRateLimit", payload.getTelemetryMsgRateLimits());
+        result.addProperty("telemetryDataPointsRateLimit", payload.getTelemetryDataPointsRateLimit());
+        result.addProperty("maxPayloadSize", payload.getMaxPayloadSize());
+        result.addProperty("maxSessionsPerDevice", payload.getMaxSessionsPerDevice());
         return result;
     }
 

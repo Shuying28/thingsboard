@@ -133,6 +133,14 @@ public class ProtoMqttAdaptor implements MqttTransportAdaptor {
             throw new AdaptorException(ex);
         }
     }
+    @Override
+    public Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, TransportProtos.DeviceTransportSettingsMsg settingsMsg) {
+        String topic = MqttTopics.DEVICE_SERVICE_SETTINGS_RESPONSE_TOPIC;
+        if (settingsMsg.getUpdated()) {
+            topic = MqttTopics.DEVICE_SERVICE_SETTINGS_TOPIC;
+        }
+        return Optional.of(createMqttPublishMsg(ctx, topic, settingsMsg.toByteArray()));
+    }
 
     @Override
     public Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, TransportProtos.GetAttributeResponseMsg responseMsg, String topicBase) throws AdaptorException {
