@@ -124,6 +124,12 @@ public class BackwardCompatibilityAdaptor implements MqttTransportAdaptor {
     }
 
     @Override
+    public Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, TransportProtos.DeviceTransportSettingsMsg settingsMsg) throws AdaptorException {
+        log.warn("[{}] invoked not implemented adaptor method! DeviceTransportSettingsMsg: {}", ctx.getSessionId(), settingsMsg);
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<MqttMessage> convertToGatewayPublish(MqttDeviceAwareSessionContext ctx, String deviceName, TransportProtos.ToDeviceRpcRequestMsg rpcRequest) throws AdaptorException {
         return protoAdaptor.convertToGatewayPublish(ctx, deviceName, rpcRequest);
     }

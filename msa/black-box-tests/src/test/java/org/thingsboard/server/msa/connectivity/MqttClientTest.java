@@ -16,6 +16,7 @@
 package org.thingsboard.server.msa.connectivity;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -37,6 +38,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.thingsboard.common.util.AbstractListeningExecutor;
+import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.common.util.ThingsBoardThreadFactory;
 import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.mqtt.MqttClientCallback;
@@ -400,6 +402,46 @@ public class MqttClientTest extends AbstractContainerTest {
 
         // Delete the created rule chain
         testRestClient.deleteRuleChain(ruleChainId);
+    }
+
+    @Test
+    public void requestDeviceSettings() throws Exception {
+        DeviceCredentials deviceCredentials = testRestClient.getDeviceCredentialsByDeviceId(device.getId());
+
+        MqttMessageListener listener = new MqttMessageListener();
+        MqttClient mqttClient = getMqttClient(deviceCredentials, listener);
+        mqttClient.on("v1/devices/me/service/settings/response", listener, MqttQoS.AT_LEAST_ONCE).get();
+
+        mqttClient.publish("v1/devices/me/service/settings/request", Unpooled.wrappedBuffer("".getBytes())).get();
+
+        MqttEvent responseFromServer = listener.getEvents().poll(3 * timeoutMultiplier, TimeUnit.SECONDS);
+        JsonNode responseNode = JacksonUtil.fromString(Objects.requireNonNull(responseFromServer).getMessage(), ObjectNode.class);
+        assertThat(responseNode).isNotNull();
+        assertThat(responseNode.has("payloadType")).isTrue();
+        assertThat(responseNode.has("maxPayloadSize")).isTrue();
+        assertThat(responseNode.has("maxSessionsPerDevice")).isTrue();
+        assertThat(responseNode.get("payloadType").asText()).isEqualTo("JSON");
+        assertThat(responseNode.get("maxPayloadSize").asInt()).isEqualTo(65536);
+        assertThat(responseNode.get("maxSessionsPerDevice").asInt()).isEqualTo(1);
+        assertThat(responseNode.has("regularMsgRateLimit")).isTrue();
+        assertThat(responseNode.has("telemetryMsgRateLimit")).isTrue();
+        assertThat(responseNode.has("telemetryDataPointsRateLimit")).isTrue();
+
+        mqttClient.publish("v1/devices/me/service/settings/request", Unpooled.wrappedBuffer("".getBytes())).get();
+
+        responseFromServer = listener.getEvents().poll(3 * timeoutMultiplier, TimeUnit.SECONDS);
+        assertThat(responseFromServer).isNotNull();
+        responseNode = JacksonUtil.fromString(Objects.requireNonNull(responseFromServer).getMessage(), ObjectNode.class);
+        assertThat(responseNode).isNotNull();
+        assertThat(responseNode.has("payloadType")).isTrue();
+        assertThat(responseNode.has("maxPayloadSize")).isTrue();
+        assertThat(responseNode.has("maxSessionsPerDevice")).isTrue();
+        assertThat(responseNode.get("payloadType").asText()).isEqualTo("JSON");
+        assertThat(responseNode.get("maxPayloadSize").asInt()).isEqualTo(65536);
+        assertThat(responseNode.get("maxSessionsPerDevice").asInt()).isEqualTo(1);
+        assertThat(responseNode.has("regularMsgRateLimit")).isTrue();
+        assertThat(responseNode.has("telemetryMsgRateLimit")).isTrue();
+        assertThat(responseNode.has("telemetryDataPointsRateLimit")).isTrue();
     }
 
     @Test

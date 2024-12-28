@@ -119,6 +119,15 @@ public class JsonMqttAdaptor implements MqttTransportAdaptor {
     }
 
     @Override
+    public Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, TransportProtos.DeviceTransportSettingsMsg settingsResponse) {
+        String topic = MqttTopics.DEVICE_SERVICE_SETTINGS_RESPONSE_TOPIC;
+        if (settingsResponse.getUpdated()) {
+            topic = MqttTopics.DEVICE_SERVICE_SETTINGS_TOPIC;
+        }
+        return Optional.of(createMqttPublishMsg(ctx, topic, JsonConverter.toJson(settingsResponse)));
+    }
+
+    @Override
     public Optional<MqttMessage> convertToGatewayPublish(MqttDeviceAwareSessionContext ctx, String deviceName, TransportProtos.GetAttributeResponseMsg responseMsg) throws AdaptorException {
         return processConvertFromGatewayAttributeResponseMsg(ctx, deviceName, responseMsg);
     }
