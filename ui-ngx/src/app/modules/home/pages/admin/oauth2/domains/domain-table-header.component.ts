@@ -28,6 +28,7 @@ import { DomainInfo } from '@shared/models/oauth2.models';
 export class DomainTableHeaderComponent extends EntityTableHeaderComponent<DomainInfo> {
 
   @HostBinding('style.width') width = '100%';
+
   constructor(protected store: Store<AppState>) {
     super(store);
   }
