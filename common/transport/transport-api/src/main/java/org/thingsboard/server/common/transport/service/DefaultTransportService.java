@@ -82,6 +82,7 @@ import org.thingsboard.server.common.transport.auth.TransportDeviceInfo;
 import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import org.thingsboard.server.common.transport.limits.EntityLimitKey;
 import org.thingsboard.server.common.transport.limits.EntityLimitsCache;
+import org.thingsboard.server.common.transport.limits.EntityTransportRateLimits;
 import org.thingsboard.server.common.transport.limits.TransportRateLimitService;
 import org.thingsboard.server.common.transport.util.JsonUtils;
 import org.thingsboard.server.common.util.ProtoUtils;
@@ -195,6 +196,8 @@ public class DefaultTransportService extends TransportActivityManager implements
     private ExecutorService consumerExecutor;
 
     private final Map<String, RpcRequestMetadata> toServerRpcPendingMap = new ConcurrentHashMap<>();
+
+    private volatile Long maxAllowedSessionsPerDevice;
 
     @PostConstruct
     public void init() {
@@ -731,6 +734,35 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
+    public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.DeviceCoreSettingsRequestToDeviceActorMsg msg, TransportServiceCallback<Void> callback) {
+        if (checkLimits(sessionInfo, msg, callback)) {
+            recordActivityInternal(sessionInfo);
+            if (maxAllowedSessionsPerDevice == null) {
+                sendToDeviceActor(sessionInfo, TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo)
+                        .setDeviceCoreSettingsRequestToDeviceActorMsg(msg).build(), callback);
+            } else {
+                callback.onSuccess(null);
+                processDeviceSettingsResponse(sessionInfo);
+            }
+        }
+    }
+
+    private void processDeviceSettingsResponse(TransportProtos.SessionInfoProto sessionInfo) {
+        EntityTransportRateLimits deviceRateLimits = rateLimitService.getDeviceRateLimits(getTenantId(sessionInfo), getDeviceId(sessionInfo));
+
+        TransportProtos.DeviceTransportSettingsMsg settingsMsg = TransportProtos.DeviceTransportSettingsMsg
+                .newBuilder()
+                .setMaxSessionsPerDevice(maxAllowedSessionsPerDevice)
+                .setRegularMsgRateLimits(deviceRateLimits.getRegularMsgRateLimit().getConfiguration())
+                .setTelemetryMsgRateLimits(deviceRateLimits.getTelemetryMsgRateLimit().getConfiguration())
+                .setTelemetryDataPointsRateLimit(deviceRateLimits.getTelemetryDataPointsRateLimit().getConfiguration())
+                .build();
+
+        SessionMsgListener listener = sessions.get(toSessionId(sessionInfo)).getListener();
+        listener.onDeviceTransportSettings(settingsMsg);
+    }
+
+    @Override
     public void recordActivity(TransportProtos.SessionInfoProto sessionInfo) {
         recordActivityInternal(sessionInfo);
     }
@@ -907,6 +939,10 @@ public class DefaultTransportService extends TransportActivityManager implements
                     String requestId = sessionId + "-" + toSessionMsg.getToServerResponse().getRequestId();
                     toServerRpcPendingMap.remove(requestId);
                     listener.onToServerRpcResponse(toSessionMsg.getToServerResponse());
+                }
+                if (toSessionMsg.hasDeviceTransportSettingsMsg()) {
+                    maxAllowedSessionsPerDevice = toSessionMsg.getDeviceTransportSettingsMsg().getMaxSessionsPerDevice();
+                    processDeviceSettingsResponse(md.getSessionInfo());
                 }
             });
             if (md.getSessionType() == TransportProtos.SessionType.SYNC) {

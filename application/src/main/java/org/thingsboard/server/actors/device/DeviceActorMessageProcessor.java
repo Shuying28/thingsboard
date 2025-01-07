@@ -72,6 +72,7 @@ import org.thingsboard.server.common.util.KvProtoUtil;
 import org.thingsboard.server.gen.transport.TransportProtos.AttributeUpdateNotificationMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ClaimDeviceMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.DeviceSessionsCacheEntry;
+import org.thingsboard.server.gen.transport.TransportProtos.DeviceTransportSettingsMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.GetAttributeRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.GetAttributeResponseMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.SessionCloseNotificationProto;
@@ -471,6 +472,9 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         if (msg.hasUplinkNotificationMsg()) {
             processUplinkNotificationMsg(sessionInfo, msg.getUplinkNotificationMsg());
         }
+        if (msg.hasDeviceCoreSettingsRequestToDeviceActorMsg()) {
+            processDeviceCoreSettingsRequest(sessionInfo);
+        }
         callback.onSuccess();
     }
 
@@ -855,6 +859,17 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         } else {
             notifyTransportAboutSessionsCloseAndDumpSessions(TransportSessionCloseReason.CREDENTIALS_UPDATED);
         }
+    }
+
+    private void processDeviceCoreSettingsRequest(SessionInfoProto sessionInfo) {
+        UUID sessionId = getSessionId(sessionInfo);
+        ToTransportMsg msg = ToTransportMsg.newBuilder()
+                .setSessionIdMSB(sessionId.getMostSignificantBits())
+                .setSessionIdLSB(sessionId.getLeastSignificantBits())
+                .setDeviceTransportSettingsMsg(DeviceTransportSettingsMsg.newBuilder()
+                .setMaxSessionsPerDevice(systemContext.getMaxConcurrentSessionsPerDevice()).build())
+                .build();
+        systemContext.getTbCoreToTransportService().process(sessionInfo.getNodeId(), msg);
     }
 
     private void notifyTransportAboutSessionsCloseAndDumpSessions(TransportSessionCloseReason transportSessionCloseReason) {
