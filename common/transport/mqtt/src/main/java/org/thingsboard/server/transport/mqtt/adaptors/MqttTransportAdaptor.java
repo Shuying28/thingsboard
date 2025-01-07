@@ -38,6 +38,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToDeviceRpcResponseM
 import org.thingsboard.server.gen.transport.TransportProtos.ToServerRpcRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToServerRpcResponseMsg;
 import org.thingsboard.server.transport.mqtt.session.MqttDeviceAwareSessionContext;
+import org.thingsboard.server.gen.transport.TransportProtos.DeviceTransportSettingsMsg;
 
 import java.util.Optional;
 
@@ -62,6 +63,7 @@ public interface MqttTransportAdaptor {
 
     Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, GetAttributeResponseMsg responseMsg, String topicBase) throws AdaptorException;
 
+    Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, DeviceTransportSettingsMsg settingsMsg) throws AdaptorException;
     Optional<MqttMessage> convertToGatewayPublish(MqttDeviceAwareSessionContext ctx, String deviceName, GetAttributeResponseMsg responseMsg) throws AdaptorException;
 
     Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, AttributeUpdateNotificationMsg notificationMsg, String topic) throws AdaptorException;

@@ -45,4 +45,6 @@ public interface TransportRateLimitService {
 
     void invalidateRateLimitsIpTable(long sessionInactivityTimeout);
 
+    EntityTransportRateLimits getDeviceRateLimits(TenantId tenantId, DeviceId deviceId);
+
 }
