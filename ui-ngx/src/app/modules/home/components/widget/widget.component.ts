@@ -155,7 +155,6 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
 
   @ViewChild('widgetContent', {read: ViewContainerRef, static: true}) widgetContentContainer: ViewContainerRef;
 
-  widget: Widget;
   widgetInfo: WidgetInfo;
   errorMessages: string[];
   widgetContext: WidgetContext;
